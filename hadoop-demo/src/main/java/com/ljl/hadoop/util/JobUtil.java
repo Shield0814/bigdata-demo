@@ -12,13 +12,15 @@ public class JobUtil {
         String queue = ParameterUtil.getArgByKey(args, "queue");
         String numReduceTasks = ParameterUtil.getArgByKey(args, "num-reduce-task");
         //2. 配置mr相关参数，队列，reducer任务数
-        Configuration conf = new Configuration();
+        Configuration conf = tool.getConf();
+        if (conf == null) {
+            conf = new Configuration();
+        }
         if (!StringUtils.isEmpty(queue)) {
             conf.set("mapreduce.job.queuename", queue);
         } else {
             conf.set("mapreduce.job.queuename", "default");
         }
-
 
         try {
             if (!StringUtils.isEmpty(numReduceTasks)) {
