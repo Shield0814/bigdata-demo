@@ -1,6 +1,7 @@
 package com.ljl.hadoop.mr.groupingcomparator;
 
 import com.ljl.hadoop.common.key.OrderKey;
+import com.ljl.hadoop.common.parttioner.RandomPartitioner;
 import com.ljl.hadoop.util.JobUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -31,6 +32,8 @@ public class OrderDriver implements Tool {
 
         FileInputFormat.setInputPaths(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        job.setNumReduceTasks(3);
+        job.setPartitionerClass(RandomPartitioner.class);
 
         boolean res = job.waitForCompletion(true);
         return res ? 0 : 1;
