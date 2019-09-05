@@ -22,6 +22,7 @@ import java.util.Map;
  * 要点：
  * 1. mapper启动时，从分布式缓存中加载小表
  * 2. reducer数量设置成0，即，不启动reducer
+ * 3. driver端设置缓存文件 cacheFiles
  */
 public class EmpDeptMapper extends Mapper<LongWritable, Text, EmpDeptWritableComparable, NullWritable> {
 
