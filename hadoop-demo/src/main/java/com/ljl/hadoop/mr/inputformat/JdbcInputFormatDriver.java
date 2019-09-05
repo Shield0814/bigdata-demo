@@ -8,16 +8,21 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 
+import javax.xml.soap.Text;
+
 public class JdbcInputFormatDriver implements Tool {
     private Configuration conf;
 
     @Override
     public int run(String[] args) throws Exception {
-        Job job = Job.getInstance(getConf());
-        String d = getConf().get("mapreduce.inputformat.jdbc.table");
+        Configuration conf = getConf();
+        Job job = Job.getInstance(conf);
+
         job.setJarByClass(JdbcInputFormatDriver.class);
 
         job.setMapperClass(JdbcMapper.class);
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(Text.class);
 
         job.setInputFormatClass(JdbcInputFormat.class);
 
@@ -35,12 +40,13 @@ public class JdbcInputFormatDriver implements Tool {
 
     @Override
     public Configuration getConf() {
-        return conf;
+        return this.conf;
     }
 
     public static void main(String[] args) {
         JdbcInputFormatDriver driver = new JdbcInputFormatDriver();
         Configuration conf = new Configuration();
+        conf.set("xxx", "11111");
         conf.set("mapreduce.inputformat.jdbc.table", "tb_test");
         conf.setInt("mapreduce.job.reduces", 0);
         driver.setConf(conf);

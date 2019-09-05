@@ -35,24 +35,45 @@ public class JdbcInputFormat extends InputFormat<Text, MapWritable> {
 
 
     /**
-     * 数据库切片元数据
+     * 数据库切片元数据，必须实现Writable因为该类需要通过网络传输
      */
-    class DBInputSplit extends InputSplit implements Writable {
+    static class DBInputSplit extends InputSplit implements Writable {
         //切片中数据开始和结束的id
         private int start;
         private int end;
 
-        public DBInputSplit() {
+        @Override
+        public void write(DataOutput out) throws IOException {
+            out.writeInt(this.start);
+            out.writeInt(this.end);
         }
 
+        @Override
+        public void readFields(DataInput in) throws IOException {
+            this.start = in.readInt();
+            this.end = in.readInt();
+        }
+
+        /**
+         * 获取切片长度
+         *
+         * @return
+         */
         @Override
         public long getLength() {
             return end - start;
         }
 
+        /**
+         * 切片的最佳文职，返回主机列表，用于本地化调度
+         * @return
+         */
         @Override
         public String[] getLocations() {
             return new String[0];
+        }
+
+        public DBInputSplit() {
         }
 
         public DBInputSplit(int start, int end) {
@@ -76,17 +97,6 @@ public class JdbcInputFormat extends InputFormat<Text, MapWritable> {
             this.end = end;
         }
 
-        @Override
-        public void write(DataOutput out) throws IOException {
-            out.write(start);
-            out.write(end);
-        }
-
-        @Override
-        public void readFields(DataInput in) throws IOException {
-            this.start = in.readInt();
-            this.end = in.readInt();
-        }
 
         @Override
         public String toString() {
@@ -94,6 +104,11 @@ public class JdbcInputFormat extends InputFormat<Text, MapWritable> {
         }
     }
 
+    /**
+     *
+     * @param context job 上下文
+     * @return 切片信息
+     */
     @Override
     public List<InputSplit> getSplits(JobContext context) {
         List<InputSplit> splits = new ArrayList<>();
@@ -108,7 +123,7 @@ public class JdbcInputFormat extends InputFormat<Text, MapWritable> {
             return createSplits(total, splitSize);
         } else {
             if (!StringUtils.isEmpty(table)) {
-                String countSql = "select count(1) as from total from " + table + " t";
+                String countSql = "select count(1) as total from " + table + " t";
                 int total = Integer.parseInt(query(conn, countSql).get(0).get(new Text("total")).toString());
                 return createSplits(total, splitSize);
             }
@@ -152,13 +167,14 @@ public class JdbcInputFormat extends InputFormat<Text, MapWritable> {
 
         try {
             PreparedStatement stat = conn.prepareStatement(sql);
+
             ResultSet rs = stat.executeQuery();
             ResultSetMetaData rsMeta = rs.getMetaData();
             int columnCount = rsMeta.getColumnCount();
             while (rs.next()) {
                 Map<Text, Text> res = new HashMap<>();
                 for (int i = 1; i <= columnCount; i++) {
-                    String tmp = rs.getString(1);
+                    String tmp = rs.getString(i);
                     Text txtRes = new Text(tmp);
                     res.put(new Text(rsMeta.getColumnLabel(i)), txtRes);
                 }
@@ -191,6 +207,7 @@ public class JdbcInputFormat extends InputFormat<Text, MapWritable> {
 
     }
 
+
     @Override
     public RecordReader<Text, MapWritable> createRecordReader(InputSplit split, TaskAttemptContext context) {
         return new JdbcRecordReader();
@@ -216,22 +233,14 @@ public class JdbcInputFormat extends InputFormat<Text, MapWritable> {
             String sql = conf.get(MAPRED_INPUTFORMAT_JDBC_SQL);
             String table = conf.get(MAPRED_INPUTFORMAT_JDBC_TABLE);
             if (!StringUtils.isEmpty(sql)) {
-                sql = "set @rowNO=0;\n" +
-                        "select * from (\n" +
-                        "   select ( @rowNO := @rowNo + 1 ) AS rowno,t.* \n" +
-                        "   from (" + sql + ") t \n" +
-                        ") d\n" +
+                sql = "select * from (select row_no() as rowno ,t.* from (" + sql + ") t ) d " +
                         "where d.rowno >=" + inputSplit.getStart() + "\n" +
-                        "and d.rowno < " + inputSplit.getEnd();
+                        "and d.rowno <= " + inputSplit.getEnd();
             } else {
                 if (!StringUtils.isEmpty(table)) {
-                    sql = "set @rowNO=0;\n" +
-                            "select * from (\n" +
-                            "   select ( @rowNO := @rowNo + 1 ) AS rowno,t.* \n" +
-                            "   from (" + table + ") t \n" +
-                            ") d\n" +
+                    sql = "select * from (select row_no() as rowno ,t.* from " + table + " t ) d " +
                             "where d.rowno >=" + inputSplit.getStart() + "\n" +
-                            "and d.rowno < " + inputSplit.getEnd();
+                            "and d.rowno <= " + inputSplit.getEnd();
                 }
             }
             data = query(conn, sql);
@@ -239,7 +248,7 @@ public class JdbcInputFormat extends InputFormat<Text, MapWritable> {
 
         @Override
         public boolean nextKeyValue() {
-            if (count <= data.size()) {
+            if (count < data.size()) {
                 Map<Text, Text> rowData = data.get(count);
                 for (Map.Entry<Text, Text> row : rowData.entrySet()) {
                     currentValue.put(row.getKey(), row.getValue());
