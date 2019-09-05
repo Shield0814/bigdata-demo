@@ -11,14 +11,30 @@ public class EmpDeptWritableComparable implements WritableComparable<EmpDeptWrit
     //员工编号
     private int empno;
 
+    //员工姓名
     private String ename;
+
+    //员工职位
     private String job;
+
+    //直属领导
     private int mgr;
+
+    //雇用时间
     private String hireDate;
+
+    //薪水
     private float sal;
+
+    //提成
     private float comm;
+
+    //部门标号
     private int deptno;
+
+    //部门名称（从部门表获得）
     private String dname;
+    //部门地址（从部门表获得）
     private String loc;
 
 
