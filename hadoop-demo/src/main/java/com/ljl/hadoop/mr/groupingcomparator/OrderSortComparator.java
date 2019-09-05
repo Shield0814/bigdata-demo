@@ -9,7 +9,7 @@ import org.apache.hadoop.io.WritableComparator;
  * reducer在拉取mapper端的数据时会根据分组排序器来判断是否时相同key，
  * 相同的key只会进入reducer一次，即使后面还存在该key，他的值也不会收集到reducer的Iterable中
  * 问题点：
- * 必须重写构造方法，否则会报空指针异常
+ * 必须重写构造方法，并且createInstances必须为true，否则reducer端读取数据时会报空指针异常
  */
 public class OrderSortComparator extends WritableComparator {
 
