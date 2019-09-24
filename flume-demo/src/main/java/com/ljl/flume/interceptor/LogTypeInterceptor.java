@@ -30,7 +30,6 @@ public class LogTypeInterceptor implements Interceptor {
      */
     @Override
     public void initialize() {
-
     }
 
     /**
