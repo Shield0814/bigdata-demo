@@ -1,8 +1,6 @@
 package com.ljl.flume.util;
 
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -56,26 +54,26 @@ public class JdbcUtils {
         return data;
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException, ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String url = "jdbc:mysql://127.0.0.1/test";
-        String name = "com.mysql.jdbc.Driver";
-        String user = "root";
-        String password = "root";
-        Connection conn = getConnection(name, url, user, password);
-        String sql = "select * from emp where hiredate >= ? and hiredate < ?";
-
-        Date date = new Date(1569307656139L);
-        System.out.println(date);
-        System.out.println(new Timestamp(1569307656139L));
-
-
-        List<String> data = getQueryResult(conn, sql,
-                new Timestamp(sdf.parse("1980-12-17").getTime()),
-                new Timestamp(sdf.parse("1982-02-13").getTime()));
-
-        data.forEach(System.out::println);
-
-
-    }
+//    public static void main(String[] args) throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException, ParseException {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        String url = "jdbc:mysql://127.0.0.1/test";
+//        String name = "com.mysql.jdbc.Driver";
+//        String user = "root";
+//        String password = "root";
+//        Connection conn = getConnection(name, url, user, password);
+//        String sql = "select * from emp where hiredate >= ? and hiredate < ?";
+//
+//        Date date = new Date(1569307656139L);
+//        System.out.println(date);
+//        System.out.println(new Timestamp(1569307656139L));
+//
+//
+//        List<String> data = getQueryResult(conn, sql,
+//                new Timestamp(sdf.parse("1980-12-17").getTime()),
+//                new Timestamp(sdf.parse("1982-02-13").getTime()));
+//
+//        data.forEach(System.out::println);
+//
+//
+//    }
 }
