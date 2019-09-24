@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -25,8 +26,8 @@ import java.util.stream.Collectors;
  */
 public class JdbcTableSource extends AbstractSource implements Configurable, PollableSource {
 
-    private static long BACKOFF_SLEEP_INCREMENT = 1000;
-    private static long MAX_BACKOFF_SLEEP_INTERVAL = 10000;
+    private long BACKOFF_SLEEP_INCREMENT = 1000;
+    private long MAX_BACKOFF_SLEEP_INTERVAL = 10000;
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcTableSource.class);
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -48,11 +49,11 @@ public class JdbcTableSource extends AbstractSource implements Configurable, Pol
 
     //数据开始时间
     private static final String START_TIME = "START_TIME";
-    private Date startTime;
+    private volatile Date startTime;
 
 
     //上批次抽取数据的结束时间
-    private Date lastExtractTime;
+    private volatile Date lastExtractTime;
 
     /**
      * agent启动时调用
@@ -68,7 +69,6 @@ public class JdbcTableSource extends AbstractSource implements Configurable, Pol
         } catch (SQLException e) {
             logger.error("获取数据库连接错误", e);
         } catch (IllegalAccessException e) {
-
             e.printStackTrace();
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -101,13 +101,18 @@ public class JdbcTableSource extends AbstractSource implements Configurable, Pol
      */
     @Override
     public Status process() throws EventDeliveryException {
-        List<Event> events = null;
+        List<Event> events;
         try {
+
             events = extractData();
+
             if (!events.isEmpty()) {
+
                 getChannelProcessor().processEventBatch(events);
+
+
             }
-            TimeUnit.SECONDS.sleep(2);
+            TimeUnit.SECONDS.sleep(1);
             return Status.READY;
         } catch (Exception e) {
             logger.error("抽取数据时发生错误", e);
@@ -121,15 +126,26 @@ public class JdbcTableSource extends AbstractSource implements Configurable, Pol
      * @return
      */
     private List<Event> extractData() throws SQLException, ParseException {
+        lastExtractTime = new Date();
+        if (logger.isInfoEnabled())
+            logger.info("prepare extract data: startTime=" + startTime + ",lastExtractTime" + lastExtractTime);
 
         List<String> data = JdbcUtils.getQueryResult(conn, sql, startTime, lastExtractTime);
-        startTime = lastExtractTime;
-        lastExtractTime = new Date();
-        return data.stream().map(line -> {
-            SimpleEvent event = new SimpleEvent();
-            event.setBody(line.getBytes());
-            return event;
-        }).collect(Collectors.toList());
+
+        if (!data.isEmpty()) {
+            startTime = lastExtractTime;
+            if (logger.isInfoEnabled())
+                logger.info("next extract data: startTime=" + startTime);
+
+            return data.stream().map(line -> {
+                SimpleEvent event = new SimpleEvent();
+                event.setBody(line.getBytes());
+                return event;
+            }).collect(Collectors.toList());
+        } else {
+            return new ArrayList<>();
+        }
+
     }
 
     /**
@@ -166,4 +182,6 @@ public class JdbcTableSource extends AbstractSource implements Configurable, Pol
             startTime = new Date();
         }
     }
+
+
 }

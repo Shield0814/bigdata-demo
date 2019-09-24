@@ -22,21 +22,21 @@ public class JdbcUtils {
             throws ClassNotFoundException, SQLException,
             IllegalAccessException, InstantiationException {
 
-        Class<Driver> driverClazz = (Class<Driver>) Class.forName(driver);
-        DriverManager.registerDriver(driverClazz.newInstance());
-        Connection conn = DriverManager.getConnection(url, user, password);
-        return conn;
+        Class driverClazz = Class.forName(driver);
+        DriverManager.registerDriver((Driver) driverClazz.newInstance());
+
+        return DriverManager.getConnection(url, user, password);
     }
 
     /**
      * 执行sql获得查询结果
      *
-     * @param conn
-     * @param sql
-     * @param params
-     * @return
+     * @param conn   数据库连接
+     * @param sql    sql语句
+     * @param params sql语句参数
+     * @return sql查询结果
      */
-    public static List<String> getQueryResult(Connection conn, String sql, Date... params) throws SQLException, ParseException {
+    public static List<String> getQueryResult(Connection conn, String sql, Date... params) throws SQLException {
         List<String> data = new ArrayList<>();
         PreparedStatement pstm = conn.prepareStatement(sql);
         for (int i = 0; i < params.length; i++) {
@@ -51,6 +51,8 @@ public class JdbcUtils {
             }
             data.add(sb.substring(0, sb.length() - 1));
         }
+        pstm.clearParameters();
+        pstm.close();
         return data;
     }
 
@@ -67,10 +69,13 @@ public class JdbcUtils {
         System.out.println(date);
         System.out.println(new Timestamp(1569307656139L));
 
+
         List<String> data = getQueryResult(conn, sql,
                 new Timestamp(sdf.parse("1980-12-17").getTime()),
                 new Timestamp(sdf.parse("1982-02-13").getTime()));
 
         data.forEach(System.out::println);
+
+
     }
 }
