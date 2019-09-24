@@ -10,12 +10,36 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>flume-demo</artifactId>
+    <properties>
+        <flume.version>1.7.0</flume.version>
+    </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.flume</groupId>
             <artifactId>flume-ng-core</artifactId>
-            <version>1.8.0</version>
+            <version>${flume.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flume.flume-ng-sinks</groupId>
+            <artifactId>flume-ng-kafka-sink</artifactId>
+            <version>${flume.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flume.flume-ng-channels</groupId>
+            <artifactId>flume-kafka-channel</artifactId>
+            <version>${flume.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flume.flume-ng-sources</groupId>
+            <artifactId>flume-taildir-source</artifactId>
+            <version>${flume.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.36</version>
         </dependency>
     </dependencies>
     <build>
