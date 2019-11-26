@@ -37,8 +37,10 @@ object DatasetDistributedCacheAppScala {
                     (value.empno, value.ename, value.deptno, null)
                 }
             }
-        }).print()
+        }).setParallelism(1).print()
 
+        // print(),count(),collect()中已调用了execute方法，所以再调用会出现如下错误
+        // java.lang.RuntimeException: No new data sinks have been defined since the last execution.
         //        env.execute("distributed cache ")
     }
 }

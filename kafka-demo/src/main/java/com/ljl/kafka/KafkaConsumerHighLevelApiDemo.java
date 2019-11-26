@@ -25,6 +25,7 @@ public class KafkaConsumerHighLevelApiDemo {
         config.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "52428800");
         //offset为空的话，offset重置策略
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(config);
 
         consumer.subscribe(Arrays.asList("test"));

@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<configuration>
+
+    <!-- hive 优化相关 start -->
+
+    <!-- 本地模式 -->
+    <property>
+        <name>hive.exec.mode.local.auto</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>hive.exec.mode.local.auto.inputbytes.max</name>
+        <value>134217728</value>
+    </property>
+    <property>
+        <name>hive.exec.mode.local.auto.input.files.max</name>
+        <value>20</value>
+    </property>
+
+    <!--1. fetch 抓取 -->
+    <property>
+        <name>hive.fetch.task.conversion</name>
+        <value>more</value>
+    </property>
+    <property>
+        <name>hive.fetch.task.conversion.threshold</name>
+        <value>1073741824</value>
+    </property>
+    <property>
+        <name>hive.fetch.task.aggr</name>
+        <value>false</value>
+    </property>
+
+    <!--2. mapper 输出端压缩 -->
+    <property>
+        <name>hive.exec.compress.intermediate</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hive.intermediate.compression.codec</name>
+        <value>org.apache.hadoop.io.compress.SnappyCodec</value>
+    </property>
+    <property>
+        <name>hive.intermediate.compression.type</name>
+        <value></value>
+    </property>
+    <property>
+        <name>mapreduce.map.output.compress</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>mapreduce.map.output.compress.codec</name>
+        <value>org.apache.hadoop.io.compress.SnappyCodec</value>
+    </property>
+
+    <!--3. 动态分区 -->
+    <property>
+        <name>hive.exec.dynamic.partition</name>
+        <value>true</value>
+        <description>Whether or not to allow dynamic partitions in DML/DDL.</description>
+    </property>
+    <property>
+        <name>hive.exec.dynamic.partition.mode</name>
+        <value>nonstrict</value>
+        <description>
+            In strict mode, the user must specify at least one static partition
+            in case the user accidentally overwrites all partitions.
+            In nonstrict mode all partitions are allowed to be dynamic.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.max.dynamic.partitions</name>
+        <value>1000</value>
+        <description>Maximum number of dynamic partitions allowed to be created in total.</description>
+    </property>
+    <property>
+        <name>hive.exec.max.dynamic.partitions.pernode</name>
+        <value>100</value>
+        <description>Maximum number of dynamic partitions allowed to be created in each mapper/reducer node.
+        </description>
+    </property>
+
+    <!--4. mapreduce 严格模式 -->
+    <property>
+        <name>hive.mapred.mode</name>
+        <value>nonstrict</value>
+    </property>
+    <!--5. map 端预聚合 -->
+    <property>
+        <name>hive.map.aggr</name>
+        <value>true</value>
+        <description>Whether to use map-side aggregation in Hive Group By queries</description>
+    </property>
+    <!--6. group by 数据倾斜时分成两个mapred处理 -->
+    <property>
+        <name>hive.groupby.skewindata</name>
+        <value>false</value>
+        <description>Whether there is skew in data to optimize group by queries</description>
+    </property>
+
+    <!--7. 合理设置mapper,reducer个数-->
+    <property>
+        <name>hive.input.format</name>
+        <value>org.apache.hadoop.hive.ql.io.CombineHiveInputFormat</value>
+        <description>The default input format. Set this to HiveInputFormat if you encounter problems with
+            CombineHiveInputFormat.
+        </description>
+    </property>
+    <property>
+        <name>mapreduce.input.fileinputformat.split.maxsize</name>
+        <value>128000000</value>
+    </property>
+
+    <property>
+        <name>hive.exec.reducers.bytes.per.reducer</name>
+        <value>256000000</value>
+        <description>size per reducer.The default is 256Mb, i.e if the input size is 1G, it will use 4 reducers.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.reducers.max</name>
+        <value>1000</value>
+    </property>
+
+    <!--8. jvm重用 -->
+    <property>
+        <name>mapreduce.job.jvm.numtasks</name>
+        <value>10</value>
+    </property>
+
+    <!--9 开启并行执行 -->
+    <property>
+        <name>hive.exec.parallel</name>
+        <value>false</value>
+        <description>Whether to execute jobs in parallel</description>
+    </property>
+    <property>
+        <name>hive.exec.parallel.thread.number</name>
+        <value>16</value>
+        <description>How many jobs at most can be executed in parallel</description>
+    </property>
+
+    <!--10. 其他mapred优化
+        比如：环形缓冲区大小，溢写文件合并批次，内存等
+     -->
+
+    <!-- hive 优化相关 end -->
+
+    <!-- 集成hbase 相关配置start -->
+    <property>
+        <name>hive.zookeeper.quorum</name>
+        <value>bigdata116,bigdata117,bigdata118</value>
+        <description>The list of ZooKeeper servers to talk to. This is only needed for read/write locks.</description>
+    </property>
+    <property>
+        <name>hive.zookeeper.client.port</name>
+        <value>2181</value>
+        <description>The port of ZooKeeper servers to talk to. This is only needed for read/write locks.</description>
+    </property>
+
+
+    <!-- 集成hbase 相关配置end -->
+    <!--hive 元数据相关配置 start-->
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>root</value>
+        <description>Username to use against metastore database</description>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>root</value>
+        <description>password to use against metastore database</description>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:mysql://bigdata116:3306/hive?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;characterEncoding=UTF-8</value>
+        <description>
+            JDBC connect string for a JDBC metastore.
+            To use SSL to encrypt/authenticate the connection, provide database-specific SSL flag in the connection URL.
+            For example, jdbc:postgresql://myhost/db?ssl=true for postgres database.
+        </description>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>com.mysql.jdbc.Driver</value>
+        <description>Driver class name for a JDBC metastore</description>
+    </property>
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/user/hive/warehouse</value>
+        <description>location of default database for the warehouse</description>
+    </property>
+    <property>
+        <name>hive.metastore.schema.verification</name>
+        <value>false</value>
+        <description>
+            Enforce metastore schema version consistency.
+            True: Verify that version information stored in is compatible with one from Hive jars. Also disable
+            automatic
+            schema migration attempt. Users are required to manually migrate schema after Hive upgrade which ensures
+            proper metastore schema migration. (Default)
+            False: Warn if the version information stored in metastore doesn't match with one from in Hive jars.
+        </description>
+    </property>
+    <property>
+        <name>hive.metastore.uris</name>
+        <value>thrift://bigdata116:9083</value>
+        <description>Thrift URI for the remote metastore. Used by metastore client to connect to remote metastore.
+        </description>
+    </property>
+    <property>
+        <name>hive.server2.long.polling.timeout</name>
+        <value>5000ms</value>
+        <description>
+            Expects a time value with unit (d/day, h/hour, m/min, s/sec, ms/msec, us/usec, ns/nsec), which is msec if
+            not specified.
+            Time that HiveServer2 will wait before responding to asynchronous calls that use long polling
+        </description>
+    </property>
+    <property>
+        <name>hive.server2.thrift.port</name>
+        <value>10000</value>
+        <description>Port number of HiveServer2 Thrift interface when hive.server2.transport.mode is 'binary'.
+        </description>
+    </property>
+    <property>
+        <name>hive.server2.thrift.bind.host</name>
+        <value>bigdata116</value>
+        <description>Bind host on which to run the HiveServer2 Thrift service.</description>
+    </property>
+    <property>
+        <name>hive.server2.authentication</name>
+        <value>NONE</value>
+        <description>
+            Expects one of [nosasl, none, ldap, kerberos, pam, custom].
+            Client authentication types.
+            NONE: no authentication check
+            LDAP: LDAP/AD based authentication
+            KERBEROS: Kerberos/GSSAPI authentication
+            CUSTOM: Custom authentication provider
+            (Use with property hive.server2.custom.authentication.class)
+            PAM: Pluggable authentication module
+            NOSASL: Raw transport
+        </description>
+    </property>
+    <property>
+        <name>hive.server2.custom.authentication.class</name>
+        <value/>
+        <description>
+            Custom authentication class. Used when property
+            'hive.server2.authentication' is set to 'CUSTOM'. Provided class
+            must be a proper implementation of the interface
+            org.apache.hive.service.auth.PasswdAuthenticationProvider. HiveServer2
+            will call its Authenticate(user, passed) method to authenticate requests.
+            The implementation may optionally implement Hadoop's
+            org.apache.hadoop.conf.Configurable class to grab Hive's Configuration object.
+        </description>
+    </property>
+    <!--hive 元数据相关配置 end-->
+    <!-- hive 运行时环境相关配置 start -->
+    <property>
+        <name>hive.querylog.location</name>
+        <value>/home/sysadm/module/apache-hive-1.2.1-bin/iotmp</value>
+        <description>Location of Hive run time structured log file</description>
+    </property>
+    <property>
+        <name>hive.exec.local.scratchdir</name>
+        <value>/home/sysadm/module/apache-hive-1.2.1-bin/iotmp</value>
+        <description>Local scratch space for Hive jobs</description>
+    </property>
+    <property>
+        <name>hive.exec.stagingdir</name>
+        <value>.hive-staging</value>
+        <description>Directory name that will be created inside table locations in order to support HDFS encryption.
+            This is replaces ${hive.exec.scratchdir} for query results with the exception of read-only tables. In all
+            cases ${hive.exec.scratchdir} is still used for other temporary files, such as job plans.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.scratchdir</name>
+        <value>/tmp/hive</value>
+        <description>HDFS root scratch dir for Hive jobs which gets created with write all (733) permission. For each
+            connecting user, an HDFS scratch dir: ${hive.exec.scratchdir}/&lt;username&gt; is created, with
+            ${hive.scratch.dir.permission}.
+        </description>
+    </property>
+
+    <property>
+        <name>hive.downloaded.resources.dir</name>
+        <value>/home/sysadm/module/apache-hive-1.2.1-bin/iotmp/${hive.session.id}_resources</value>
+        <description>Temporary local directory for added resources in the remote file system.</description>
+    </property>
+
+    <property>
+        <name>hive.metastore.schema.verification.record.version</name>
+        <value>false</value>
+        <description>
+            When true the current MS version is recorded in the VERSION table. If this is disabled and verification is
+            enabled the MS will be unusable.
+        </description>
+    </property>
+    <!-- hive 运行时环境相关配置 end -->
+
+
+    <!-- hive spark执行引擎相关配置 start -->
+    <property>
+        <name>hive.execution.engine</name>
+        <value>mr</value>
+        <description>
+            Expects one of [mr, tez, spark].
+            Chooses execution engine. Options are: mr (Map reduce, default), tez, spark. While MR
+            remains the default engine for historical reasons, it is itself a historical engine
+            and is deprecated in Hive 2 line. It may be removed without further warning.
+        </description>
+    </property>
+
+    <property>
+        <name>hive.spark.client.future.timeout</name>
+        <value>60s</value>
+        <description>
+            Expects a time value with unit (d/day, h/hour, m/min, s/sec, ms/msec, us/usec, ns/nsec), which is sec if not
+            specified.
+            Timeout for requests from Hive client to remote Spark driver.
+        </description>
+    </property>
+    <property>
+        <name>hive.spark.job.monitor.timeout</name>
+        <value>60s</value>
+        <description>
+            Expects a time value with unit (d/day, h/hour, m/min, s/sec, ms/msec, us/usec, ns/nsec), which is sec if not
+            specified.
+            Timeout for job monitor to get Spark job state.
+        </description>
+    </property>
+    <property>
+        <name>hive.spark.client.connect.timeout</name>
+        <value>1000ms</value>
+        <description>
+            Expects a time value with unit (d/day, h/hour, m/min, s/sec, ms/msec, us/usec, ns/nsec), which is msec if
+            not specified.
+            Timeout for remote Spark driver in connecting back to Hive client.
+        </description>
+    </property>
+    <property>
+        <name>hive.spark.client.server.connect.timeout</name>
+        <value>90000ms</value>
+        <description>
+            Expects a time value with unit (d/day, h/hour, m/min, s/sec, ms/msec, us/usec, ns/nsec), which is msec if
+            not specified.
+            Timeout for handshake between Hive client and remote Spark driver. Checked by both processes.
+        </description>
+    </property>
+    <property>
+        <name>hive.spark.client.secret.bits</name>
+        <value>256</value>
+        <description>Number of bits of randomness in the generated secret for communication between Hive client and
+            remote Spark driver. Rounded down to the nearest multiple of 8.
+        </description>
+    </property>
+    <property>
+        <name>hive.spark.client.rpc.threads</name>
+        <value>8</value>
+        <description>Maximum number of threads for remote Spark driver's RPC event loop.</description>
+    </property>
+    <property>
+        <name>hive.spark.client.rpc.max.size</name>
+        <value>52428800</value>
+        <description>Maximum message size in bytes for communication between Hive client and remote Spark driver.
+            Default is 50MB.
+        </description>
+    </property>
+    <property>
+        <name>hive.spark.client.channel.log.level</name>
+        <value/>
+        <description>Channel logging level for remote Spark driver. One of {DEBUG, ERROR, INFO, TRACE, WARN}.
+        </description>
+    </property>
+    <property>
+        <name>hive.spark.client.rpc.sasl.mechanisms</name>
+        <value>DIGEST-MD5</value>
+        <description>Name of the SASL mechanism to use for authentication.</description>
+    </property>
+    <property>
+        <name>hive.spark.client.rpc.server.address</name>
+        <value/>
+        <description>The server address of HiverServer2 host to be used for communication between Hive client and remote
+            Spark driver. Default is empty, which means the address will be determined in the same way as for
+            hive.server2.thrift.bind.host.This is only necessary if the host has mutiple network addresses and if a
+            different network address other than hive.server2.thrift.bind.host is to be used.
+        </description>
+    </property>
+    <property>
+        <name>hive.spark.dynamic.partition.pruning</name>
+        <value>false</value>
+        <description>
+            When dynamic pruning is enabled, joins on partition keys will be processed by writing
+            to a temporary HDFS file, and read later for removing unnecessary partitions.
+        </description>
+    </property>
+    <property>
+        <name>hive.spark.dynamic.partition.pruning.max.data.size</name>
+        <value>104857600</value>
+        <description>Maximum total data size in dynamic pruning.</description>
+    </property>
+    <!-- hive spark执行引擎相关配置 start -->
+
+    <!-- hive tez 执行引擎相关配置 start -->
+    <property>
+        <name>hive.tez.input.format</name>
+        <value>org.apache.hadoop.hive.ql.io.HiveInputFormat</value>
+        <description>The default input format for tez. Tez groups splits in the AM.</description>
+    </property>
+    <property>
+        <name>hive.optimize.bucketmapjoin</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>hive.optimize.bucketmapjoin.sortedmerge</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>hive.auto.convert.sortmerge.join</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>hive.auto.convert.sortmerge.join.noconditionaltask</name>
+        <value>false</value>
+    </property>
+    <property>
+        <name>hive.auto.convert.join.noconditionaltask</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hive.optimize.reducededuplication.min.reducer</name>
+        <value>1</value>
+    </property>
+    <property>
+        <name>hive.optimize.mapjoin.mapreduce</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>tez.am.resource.memory.mb</name>
+        <value>1024</value>
+    </property>
+    <property>
+        <name>tez.am.java.opts</name>
+        <value>-server -Xmx512m -Djava.net.preferIPv4Stack=true</value>
+    </property>
+    <property>
+        <name>tez.am.grouping.min-size</name>
+        <value>16777216</value>
+    </property>
+
+
+    <property>
+        <name>hive.tez.exec.print.summary</name>
+        <value>false</value>
+        <description>客户端hive cli 或 beeline cli 打印tez执行概要</description>
+    </property>
+    <!-- hive tez 执行引擎相关配置 end -->
+
+    <!-- hive parquet格式存储相关配置 start -->
+    <property>
+        <name>parquet.memory.pool.ratio</name>
+        <value>0.5</value>
+        <description>
+            Maximum fraction of heap that can be used by Parquet file writers in one task.
+            It is for avoiding OutOfMemory error in tasks. Work with Parquet 1.6.0 and above.
+            This config parameter is defined in Parquet, so that it does not start with 'hive.'.
+        </description>
+    </property>
+    <property>
+        <name>hive.parquet.timestamp.skip.conversion</name>
+        <value>true</value>
+        <description>Current Hive implementation of parquet stores timestamps to UTC, this flag allows skipping of the
+            conversionon reading parquet files from other tools
+        </description>
+    </property>
+    <property>
+        <name>hive.int.timestamp.conversion.in.seconds</name>
+        <value>false</value>
+        <description>
+            Boolean/tinyint/smallint/int/bigint value is interpreted as milliseconds during the timestamp conversion.
+            Set this flag to true to interpret the value as seconds to be consistent with float/double.
+        </description>
+    </property>
+    <!-- hive parquet格式存储相关配置 end -->
+
+    <!-- hive orc格式存储相关配置 start -->
+    <property>
+        <name>hive.exec.orc.memory.pool</name>
+        <value>0.5</value>
+        <description>Maximum fraction of heap that can be used by ORC file writers</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.write.format</name>
+        <value/>
+        <description>
+            Define the version of the file to write. Possible values are 0.11 and 0.12.
+            If this parameter is not defined, ORC will use the run length encoding (RLE)
+            introduced in Hive 0.12. Any value other than 0.11 results in the 0.12 encoding.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.orc.default.stripe.size</name>
+        <value>67108864</value>
+        <description>Define the default ORC stripe size, in bytes.</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.default.block.size</name>
+        <value>268435456</value>
+        <description>Define the default file system block size for ORC files.</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.dictionary.key.size.threshold</name>
+        <value>0.8</value>
+        <description>
+            If the number of keys in a dictionary is greater than this fraction of the total number of
+            non-null rows, turn off dictionary encoding. Use 1 to always use dictionary encoding.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.orc.default.row.index.stride</name>
+        <value>10000</value>
+        <description>
+            Define the default ORC index stride in number of rows. (Stride is the number of rows
+            an index entry represents.)
+        </description>
+    </property>
+    <property>
+        <name>hive.orc.row.index.stride.dictionary.check</name>
+        <value>true</value>
+        <description>
+            If enabled dictionary check will happen after first row index stride (default 10000 rows)
+            else dictionary check will happen before writing first stripe. In both cases, the decision
+            to use dictionary or not will be retained thereafter.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.orc.default.buffer.size</name>
+        <value>262144</value>
+        <description>Define the default ORC buffer size, in bytes.</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.base.delta.ratio</name>
+        <value>8</value>
+        <description>
+            The ratio of base writer and
+            delta writer in terms of STRIPE_SIZE and BUFFER_SIZE.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.orc.default.block.padding</name>
+        <value>true</value>
+        <description>Define the default block padding, which pads stripes to the HDFS block boundaries.</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.block.padding.tolerance</name>
+        <value>0.05</value>
+        <description>
+            Define the tolerance for block padding as a decimal fraction of stripe size (for
+            example, the default value 0.05 is 5% of the stripe size). For the defaults of 64Mb
+            ORC stripe and 256Mb HDFS blocks, the default block padding tolerance of 5% will
+            reserve a maximum of 3.2Mb for padding within the 256Mb block. In that case, if the
+            available size within the block is more than 3.2Mb, a new smaller stripe will be
+            inserted to fit within that space. This will make sure that no stripe written will
+            cross block boundaries and cause remote reads within a node local task.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.orc.default.compress</name>
+        <value>ZLIB</value>
+        <description>Define the default compression codec for ORC file</description>
+    </property>
+    <property>
+        <name>hive.exec.orc.encoding.strategy</name>
+        <value>SPEED</value>
+        <description>
+            Expects one of [speed, compression].
+            Define the encoding strategy to use while writing data. Changing this will
+            only affect the light weight encoding for integers. This flag will not
+            change the compression level of higher level compression codec (like ZLIB).
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.orc.compression.strategy</name>
+        <value>SPEED</value>
+        <description>
+            Expects one of [speed, compression].
+            Define the compression strategy to use while writing data.
+            This changes the compression level of higher level compression codec (like ZLIB).
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.orc.split.strategy</name>
+        <value>HYBRID</value>
+        <description>
+            Expects one of [hybrid, bi, etl].
+            This is not a user level config. BI strategy is used when the requirement is to spend less time in split
+            generation as opposed to query execution (split generation does not read or cache file footers). ETL
+            strategy is used when spending little more time in split generation is acceptable (split generation reads
+            and caches file footers). HYBRID chooses between the above strategies based on heuristics.
+        </description>
+    </property>
+    <property>
+        <name>hive.orc.splits.ms.footer.cache.enabled</name>
+        <value>false</value>
+        <description>Whether to enable using file metadata cache in metastore for ORC file footers.</description>
+    </property>
+    <property>
+        <name>hive.orc.splits.ms.footer.cache.ppd.enabled</name>
+        <value>true</value>
+        <description>
+            Whether to enable file footer cache PPD (hive.orc.splits.ms.footer.cache.enabled
+            must also be set to true for this to work).
+        </description>
+    </property>
+    <property>
+        <name>hive.orc.splits.include.file.footer</name>
+        <value>false</value>
+        <description>
+            If turned on splits generated by orc will include metadata about the stripes in the file. This
+            data is read remotely (from the client or HS2 machine) and sent to all the tasks.
+        </description>
+    </property>
+    <property>
+        <name>hive.orc.splits.directory.batch.ms</name>
+        <value>0</value>
+        <description>
+            How long, in ms, to wait to batch input directories for processing during ORC split
+            generation. 0 means process directories individually. This can increase the number of
+            metastore calls if metastore metadata cache is used.
+        </description>
+    </property>
+    <property>
+        <name>hive.orc.splits.include.fileid</name>
+        <value>true</value>
+        <description>Include file ID in splits on file systems that support it.</description>
+    </property>
+    <property>
+        <name>hive.orc.splits.allow.synthetic.fileid</name>
+        <value>true</value>
+        <description>Allow synthetic file ID in splits on file systems that don't have a native one.</description>
+    </property>
+    <property>
+        <name>hive.orc.cache.stripe.details.size</name>
+        <value>10000</value>
+        <description>Max cache size for keeping meta info about orc splits cached in the client.</description>
+    </property>
+    <property>
+        <name>hive.orc.compute.splits.num.threads</name>
+        <value>10</value>
+        <description>How many threads orc should use to create splits in parallel.</description>
+    </property>
+    <property>
+        <name>hive.orc.cache.use.soft.references</name>
+        <value>false</value>
+        <description>
+            By default, the cache that ORC input format uses to store orc file footer use hard
+            references for the cached object. Setting this to true can help avoid out of memory
+            issues under memory pressure (in some cases) at the cost of slight unpredictability in
+            overall query performance.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.orc.skip.corrupt.data</name>
+        <value>false</value>
+        <description>
+            If ORC reader encounters corrupt data, this value will be used to determine
+            whether to skip the corrupt data or throw exception. The default behavior is to throw exception.
+        </description>
+    </property>
+    <property>
+        <name>hive.exec.orc.zerocopy</name>
+        <value>false</value>
+        <description>Use zerocopy reads with ORC. (This requires Hadoop 2.3 or later.)</description>
+    </property>
+    <property>
+        <name>hive.lazysimple.extended_boolean_literal</name>
+        <value>false</value>
+        <description>
+            LazySimpleSerde uses this property to determine if it treats 'T', 't', 'F', 'f',
+            '1', and '0' as extened, legal boolean literal, in addition to 'TRUE' and 'FALSE'.
+            The default is false, which means only 'TRUE' and 'FALSE' are treated as legal
+            boolean literal.
+        </description>
+    </property>
+    <!-- hive orc格式存储相关配置 end -->
+
+
+    <!-- atlas 相关配置 start-->
+    <property>
+        <name>hive.exec.post.hooks</name>
+        <value>org.apache.atlas.hive.hook.HiveHook</value>
+    </property>
+
+    <!-- atlas 相关配置end -->
+
+
+</configuration>

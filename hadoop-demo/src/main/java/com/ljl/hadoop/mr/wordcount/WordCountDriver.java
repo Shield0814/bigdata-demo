@@ -5,6 +5,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.SnappyCodec;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -39,9 +40,12 @@ public class WordCountDriver implements Tool {
         FileInputFormat.setInputDirRecursive(job, true);
 
         job.setOutputFormatClass(TextOutputFormat.class);
+        FileOutputFormat.setCompressOutput(job, true);
+        FileOutputFormat.setOutputCompressorClass(job, SnappyCodec.class);
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
         job.setCombinerClass(WordCountReducer.class);
+
 
         //6.提交任务
         boolean res = job.waitForCompletion(true);

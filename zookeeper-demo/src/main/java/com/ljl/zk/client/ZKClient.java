@@ -1,9 +1,6 @@
 package com.ljl.zk.client;
 
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooDefs;
-import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.data.Stat;
@@ -15,7 +12,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * 添加 digest 认证用户及密码：
+ * addauth digest sysadm:oliver8023
+ */
 public class ZKClient {
 
     private ZooKeeper zkClient;
@@ -23,7 +23,14 @@ public class ZKClient {
     @Before
     public void connect() throws IOException {
         String connetStr = "bigdata116:2181,bigdata117:2181,bigdata117:2181";
-        zkClient = new ZooKeeper(connetStr, 1000, null);
+        zkClient = new ZooKeeper(connetStr, 1000, new Watcher() {
+            @Override
+            public void process(WatchedEvent event) {
+                System.out.println("获取客户端成功");
+                System.out.println("stat:" + event.getState());
+                System.out.println("eventType:" + event.getType());
+            }
+        });
     }
 
     @After
@@ -33,6 +40,71 @@ public class ZKClient {
         }
     }
 
+    @Test
+    public void testSetData() throws KeeperException, InterruptedException {
+        Stat stat = zkClient.exists("/test/auth_ip_acl", false);
+        zkClient.setData("/test/auth_ip_acl", "test IP acl 认证".getBytes(), stat.getVersion());
+    }
+
+    @Test
+    public void testDelete() throws KeeperException, InterruptedException {
+        Stat stat = zkClient.exists("/test/auth_ip_acl", false);
+        zkClient.delete("/test/auth_ip_acl", stat.getVersion());
+    }
+
+    @Test
+    public void testWatch() throws KeeperException, InterruptedException {
+        testLs();
+        Thread.sleep(Integer.MAX_VALUE);
+    }
+
+    @Test
+    public void testLs() throws KeeperException, InterruptedException {
+        List<String> children = zkClient.getChildren("/test", new Watcher() {
+            @Override
+            public void process(WatchedEvent event) {
+                System.out.println("/test 子节点发生了改变：" + event.getType());
+                try {
+                    testLs();
+                } catch (KeeperException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        children.forEach(child -> {
+            System.out.println(child);
+        });
+
+        System.out.println("++++++++++++++++++++++++++++++++");
+    }
+
+    @Test
+    public void exists() throws KeeperException, InterruptedException {
+        Stat stat = zkClient.exists("/test", false);
+        if (stat != null) {
+            System.out.println("czxid:" + stat.getCzxid());
+            System.out.println("ctime:" + stat.getCtime());
+            System.out.println("cversion:" + stat.getCversion());
+            System.out.println("mzxid:" + stat.getMzxid());
+            System.out.println("mtime:" + stat.getMtime());
+            System.out.println("dataversion:" + stat.getVersion());
+            System.out.println("pzxid:" + stat.getPzxid());
+            System.out.println("dataLength:" + stat.getDataLength());
+            System.out.println("ephemeralOvner:" + stat.getEphemeralOwner());
+            System.out.println("aversion:" + stat.getAversion());
+            System.out.println("numChildren:" + stat.getNumChildren());
+        }
+    }
+
+    /**
+     * zookeeper digest acl测试
+     *
+     * @throws KeeperException
+     * @throws InterruptedException
+     */
     @Test
     public void testCreateNode() throws KeeperException, InterruptedException {
         //通过digest进行认证
@@ -53,6 +125,7 @@ public class ZKClient {
             List<ACL> acls2 = new ArrayList<>();
             acls2.add(new ACL(ZooDefs.Perms.ALL, new Id("ip", "127.0.0.1")));
             acls2.add(new ACL(ZooDefs.Perms.ALL, new Id("ip", "192.168.211.1")));
+            acls2.add(new ACL(ZooDefs.Perms.ALL, new Id("ip", "192.168.211.116")));
             String res2 = zkClient.create("/test/auth_ip_acl",
                     "测试IP认证".getBytes(),
                     acls2,
@@ -77,14 +150,22 @@ public class ZKClient {
         }
     }
 
+    /**
+     * 测试ip acl
+     *
+     * @throws KeeperException
+     * @throws InterruptedException
+     */
     @Test
     public void testIpAuth() throws KeeperException, InterruptedException {
-        byte[] data = zkClient.getData("/testacl1", false, null);
+        byte[] data = zkClient.getData("/test/auth_ip_acl", false, null);
         System.out.println(new String(data));
         List<ACL> acls = new ArrayList<>();
         acls.add(new ACL(ZooDefs.Perms.ALL, new Id("ip", "192.168.211.117")));
         acls.add(new ACL(ZooDefs.Perms.ALL, new Id("ip", "192.168.211.1")));
-        Stat stat = zkClient.setACL("/testacl1", acls, 1);
+        acls.add(new ACL(ZooDefs.Perms.ALL, new Id("ip", "192.168.211.116")));
+
+        Stat stat = zkClient.setACL("/test/auth_ip_acl", acls, 1);
     }
 
     @Test

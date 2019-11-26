@@ -7,7 +7,7 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class JobUtil {
 
-    public static void runJob(String[] args, Tool tool) {
+    public static int runJob(String[] args, Tool tool) {
         //1. 解析应用参数
         String queue = ParameterUtil.getArgByKey(args, "queue");
         String numReduceTasks = ParameterUtil.getArgByKey(args, "num-reduce-task");
@@ -33,9 +33,9 @@ public class JobUtil {
         //创建并运行任务
         tool.setConf(conf);
         try {
-            ToolRunner.run(tool, args);
+            return ToolRunner.run(tool, args);
         } catch (Exception e) {
-            e.printStackTrace();
+            return 255;
         }
     }
 }

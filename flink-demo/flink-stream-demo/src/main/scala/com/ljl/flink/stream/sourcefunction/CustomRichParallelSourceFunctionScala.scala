@@ -17,5 +17,5 @@ class CustomRichParallelSourceFunctionScala extends RichParallelSourceFunction[I
         }
     }
 
-    override def cancel(): Unit = false
+    override def cancel(): Unit = isRunning = false
 }
