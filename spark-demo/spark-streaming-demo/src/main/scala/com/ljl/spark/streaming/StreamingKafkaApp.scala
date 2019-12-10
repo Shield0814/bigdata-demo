@@ -107,20 +107,20 @@ object StreamingKafkaApp {
                 canCommitOffsets.commitAsync(offsetRanges)
             })
 
-
-        inputDStream.foreachRDD(rdd => {
-            offsetRanges = rdd.asInstanceOf[HasOffsetRanges].offsetRanges
-            println(s"rdd ${rdd.id} 中对应的kafka消息的offset信息 ${offsetRanges.mkString(",")}")
-
-            rdd.map(record => record.value)
-                .flatMap(_.split("\\W"))
-                .map((_, 1))
-                .reduceByKey(_ + _)
-                .foreachPartition(iter => {
-                    iter.foreach(println)
-                })
-            inputDStream.asInstanceOf[CanCommitOffsets].commitAsync(offsetRanges)
-        })
+        //
+        //        inputDStream.foreachRDD(rdd => {
+        //            offsetRanges = rdd.asInstanceOf[HasOffsetRanges].offsetRanges
+        //            println(s"rdd ${rdd.id} 中对应的kafka消息的offset信息 ${offsetRanges.mkString(",")}")
+        //
+        //            rdd.map(record => record.value)
+        //                .flatMap(_.split("\\W"))
+        //                .map((_, 1))
+        //                .reduceByKey(_ + _)
+        //                .foreachPartition(iter => {
+        //                    iter.foreach(println)
+        //                })
+        //            inputDStream.asInstanceOf[CanCommitOffsets].commitAsync(offsetRanges)
+        //        })
         ssc
     }
 

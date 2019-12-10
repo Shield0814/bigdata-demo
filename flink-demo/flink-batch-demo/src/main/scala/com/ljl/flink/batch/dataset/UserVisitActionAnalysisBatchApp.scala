@@ -2,8 +2,7 @@ package com.ljl.flink.batch.dataset
 
 import java.text.SimpleDateFormat
 
-import org.apache.flink.api.scala.DataSet
-
+import org.apache.flink.api.scala.{DataSet, _}
 case class UserVisitAction(date: String,
                            user_id: Long,
                            session_id: String,

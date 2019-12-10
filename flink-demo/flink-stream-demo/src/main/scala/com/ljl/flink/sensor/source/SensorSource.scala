@@ -28,7 +28,7 @@ class SensorSource extends RichParallelSourceFunction[SensorReading] {
         val taskIdx = getRuntimeContext.getIndexOfThisSubtask + 1
 
         //随机生成10个传感器id和温度
-        var tmpTemporature = for (i <- 0 until 10)
+        var tmpTemporature = for (i <- 0 until 1)
             yield (s"sensor_${i}", 65 + (random.nextGaussian() * 20))
 
         while (running) {
@@ -39,11 +39,11 @@ class SensorSource extends RichParallelSourceFunction[SensorReading] {
             var currentTimeMills = System.currentTimeMillis()
 
             //对传感器数据产生时间做一个随机1000ms以内的延迟,
-            tmpTemporature.map(stemp => SensorReading(stemp._1, currentTimeMills - random.nextInt(1000), stemp._2))
+            tmpTemporature.map(stemp => SensorReading(stemp._1, currentTimeMills - random.nextInt(3000), stemp._2))
                 .foreach(ctx.collect(_))
 
             //每个100ms发送一次数据
-            Thread.sleep(1000)
+            Thread.sleep(500)
         }
     }
 

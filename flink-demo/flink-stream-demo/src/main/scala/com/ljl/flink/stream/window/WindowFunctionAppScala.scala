@@ -21,7 +21,8 @@ object WindowFunctionAppScala {
         val allWindowedStream: AllWindowedStream[(String, Int), TimeWindow] =
             words.timeWindowAll(Time.seconds(5))
         // keyed window 可以并行处理
-        words.keyBy(0).setParallelism(1)
+        words.keyBy(0).setParallelism(1).print()
+
 
 
         //        aggregateFunctionBaseKeyedWindow(words,senv)

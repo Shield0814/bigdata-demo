@@ -1,5 +1,24 @@
 package com.ljl.scala.implictconvert
 
+import scala.reflect.{ClassTag, classTag}
+
+
+class Printer[T: ClassTag] {
+
+    implicit val tClassTag = classTag[T]
+
+    def print(t: T)(implicit tClassTag: ClassTag[T]): Unit = {
+        println(tClassTag)
+
+        val fields = tClassTag.runtimeClass.getDeclaredFields
+        for (field <- fields) {
+            field.setAccessible(true)
+            println(field.getName + "," + field.get(t))
+        }
+    }
+}
+
+case class Person(id: String, name: String)
 
 /**
   * 隐式转换使用的时机：类型不匹配时，方法不存在时
@@ -27,8 +46,8 @@ object ImplictConvertDemo {
         sayHello("mark") //mark
         sayHello //smith
 
-        //2. 隐式函数及其使用：用隐式函数对一个Int类型的数组降序排序
-
+        val printer = new Printer[Person]
+        printer.print(Person("11", "oliver"))
 
     }
 

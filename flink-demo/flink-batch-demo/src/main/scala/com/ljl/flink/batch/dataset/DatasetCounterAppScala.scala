@@ -27,7 +27,7 @@ object DatasetCounterAppScala {
                     counter.add(1)
                     value
                 }
-            }).setParallelism(5).writeAsText("file:///d:/data/out/5", WriteMode.OVERWRITE)
+            }).setParallelism(5).writeAsText("file:///d:/data/out/5", WriteMode.OVERWRITE).setParallelism(1)
 
         val result = env.execute("DatasetCounterAppScala")
         val count = result.getAccumulatorResult[Int]("element-accumulator")

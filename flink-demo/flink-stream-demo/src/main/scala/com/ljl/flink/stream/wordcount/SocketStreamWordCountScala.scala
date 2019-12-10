@@ -19,13 +19,14 @@ object SocketStreamWordCountScala {
         //        } else {
         //            throw new IllegalArgumentException("主机，端口号不能为空")
         //        }
-        lines = senv.socketTextStream("bigdata116", 9999)
+        lines = senv.socketTextStream("bigdata116", 9999).uid("socketDataStream")
         lines.flatMap(_.split("\\W"))
             .map((_, 1))
             .keyBy(0)
             //            .timeWindow(Time.seconds(5))
             .sum(1)
             .print().setParallelism(1)
+
 
         senv.execute("scala scoket stream wordcount")
 

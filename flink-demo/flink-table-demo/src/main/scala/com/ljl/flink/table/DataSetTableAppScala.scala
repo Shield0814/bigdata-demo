@@ -20,10 +20,12 @@ object DataSetTableAppScala {
         val empTable = tenv.fromDataSet(empDataset)
 
         //注册表
-        tenv.registerTable("tbl_emp", empTable)
+        tenv.registerTable("emp", empTable)
 
         //执行sql
-        val resultTable = tenv.sqlQuery("select deptno,max(sal) as max_sal from tbl_emp group by deptno")
+        val resultTable = tenv.sqlQuery("select deptno,max(sal) as max_sal from emp group by deptno")
+
+
 
         //输出结果
         tenv.toDataSet[Row](resultTable).print()

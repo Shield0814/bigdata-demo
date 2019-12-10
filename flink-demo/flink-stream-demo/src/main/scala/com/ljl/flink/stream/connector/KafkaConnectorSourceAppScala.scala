@@ -23,7 +23,6 @@ object KafkaConnectorSourceAppScala {
       */
     def kafkaConnectorAsSource(senv: StreamExecutionEnvironment): Unit = {
         val brokerList = "bigdata116:9092,bigdata117:9092,bigdata118:9092"
-        val zkConStr = "bigdata116:2181,bigdata117:2181,bigdata118:2181"
         val topicId = "flink-connector-kafka-sink"
 
         val props = new Properties()
@@ -43,7 +42,6 @@ object KafkaConnectorSourceAppScala {
                 } else {
                     (w, 1)
                 }
-
             })
             .keyBy(0)
             .sum(1)

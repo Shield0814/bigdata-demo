@@ -18,7 +18,7 @@ object SensorHighTempApp {
         //使用 reduceFunction 计算每个传感器在一个5s的滚动窗口中的最低温度
         readings.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor[SensorReading](Time.seconds(1)) {
             override def extractTimestamp(element: SensorReading): Long = {
-                element.timestamp
+                element.timestamp * 1000
             }
         }).keyBy(_.id)
             .timeWindow(Time.seconds(5))

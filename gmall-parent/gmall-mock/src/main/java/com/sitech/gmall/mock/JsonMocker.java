@@ -158,8 +158,6 @@ public class JsonMocker {
                 e.printStackTrace();
             }
         }
-
-
     }
 
     public void sendLog(String log) {

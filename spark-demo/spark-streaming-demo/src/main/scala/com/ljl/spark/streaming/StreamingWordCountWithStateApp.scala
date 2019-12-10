@@ -9,9 +9,18 @@ object StreamingWordCountWithStateApp {
         val conf = new SparkConf()
             .setAppName("StreamingWordCountWithStateApp")
             .setMaster("local[*]")
+        val checkPointDir = "D:\\data\\checkpoint"
+        val ssc = StreamingContext.getOrCreate(checkPointDir, () => createContext(conf, checkPointDir))
+
+        ssc.start()
+        ssc.awaitTermination()
+    }
+
+    def createContext(conf: SparkConf, checkPointDir: String) = {
         val ssc = new StreamingContext(conf, Seconds(5))
 
-        ssc.checkpoint("./checkpoint")
+
+        ssc.checkpoint(checkPointDir)
 
         val lineDStream = ssc.socketTextStream("bigdata116", 9999)
 
@@ -28,8 +37,6 @@ object StreamingWordCountWithStateApp {
             .map((_, 1))
             .updateStateByKey[Long](updateFunc _)
             .print()
-
-        ssc.start()
-        ssc.awaitTermination()
+        ssc
     }
 }

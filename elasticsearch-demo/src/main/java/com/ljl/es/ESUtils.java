@@ -8,10 +8,13 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.get.MultiGetItemResponse;
 import org.elasticsearch.action.get.MultiGetResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -19,6 +22,7 @@ import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -240,8 +244,10 @@ public class ESUtils {
      */
     public static boolean insertDocumentByBulk(TransportClient client, String index, String type, List<String> docJsons) {
 
-        BulkRequestBuilder bulkRequestBuilder = client.prepareBulk();
-
+        BulkRequestBuilder bulk = client.prepareBulk();
+        for (String docJson : docJsons) {
+            bulk.add(new IndexRequest(index, type).source(docJson, XContentType.JSON));
+        }
         return false;
     }
 
@@ -308,8 +314,26 @@ public class ESUtils {
     }
 
 
-    public static boolean createIndexWithMapping(TransportClient client, String index) {
-
+    public static boolean createIndexWithMapping(TransportClient client, String index) throws IOException {
+        XContentBuilder builder = XContentFactory.jsonBuilder()
+                .startObject()
+                .startObject("article")
+                .startObject("properties")
+                .startObject("id1")
+                .field("type", "string")
+                .field("store", "yes")
+                .endObject()
+                .startObject("title2")
+                .field("type", "string")
+                .field("store", "no")
+                .endObject()
+                .startObject("content")
+                .field("type", "string")
+                .field("store", "yes")
+                .endObject()
+                .endObject()
+                .endObject()
+                .endObject();
         return false;
     }
 
