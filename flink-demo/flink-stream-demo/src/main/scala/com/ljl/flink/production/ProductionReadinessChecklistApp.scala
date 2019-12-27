@@ -6,6 +6,7 @@ import java.util.Properties
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.api.scala._
+import org.apache.flink.configuration.CheckpointingOptions
 import org.apache.flink.contrib.streaming.state.{PredefinedOptions, RocksDBStateBackend}
 import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
@@ -33,9 +34,10 @@ object ProductionReadinessChecklistApp {
     def main(args: Array[String]): Unit = {
 
         val env = StreamExecutionEnvironment.getExecutionEnvironment
-
+        CheckpointingOptions.LOCAL_RECOVERY
         //显式指定算子的最大并行度
         env.setMaxParallelism(100)
+
 
         //选择合适的状态后端
         val checkpointDataDir = "hdfs://bigdata116:8020/user/sysadm/flink-chk"
@@ -43,6 +45,7 @@ object ProductionReadinessChecklistApp {
         rocksBackend.setPredefinedOptions(PredefinedOptions.SPINNING_DISK_OPTIMIZED_HIGH_MEM)
         env.setStateBackend(rocksBackend)
 
+        //checkpoint 相关设置及对大变量的优化
         //设置checkpiont间隔
         //开启exactly-once checkpoint
         env.enableCheckpointing(10000L, CheckpointingMode.EXACTLY_ONCE)
@@ -63,6 +66,8 @@ object ProductionReadinessChecklistApp {
 
         //设置flink应用重启策略: noRestart, fixedDelayRestart,failureRateRestart
         env.getConfig.setRestartStrategy(RestartStrategies.noRestart())
+
+        //开启任务本地恢复，减少通过jobmanager恢复造成数据通过网络传输导致的恢复时间长问题
 
 
         //kafka 配置参数

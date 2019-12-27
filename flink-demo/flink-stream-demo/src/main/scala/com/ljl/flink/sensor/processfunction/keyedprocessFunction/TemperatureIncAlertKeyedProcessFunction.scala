@@ -7,6 +7,8 @@ import org.apache.flink.api.scala.typeutils.Types
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
 import org.apache.flink.util.Collector
 
+import scala.collection.mutable
+
 /**
   * KeyedProcessFunction
   * 监控温度传感器的温度值，如果温度值在 1s 之内(processing time)连续上升，报警
@@ -27,6 +29,9 @@ class TemperatureIncAlertKeyedProcessFunction extends KeyedProcessFunction[Strin
         new ValueStateDescriptor[Long]("alertTimer", Types.of[Long])
     )
 
+    lazy val taskName: Int = getRuntimeContext.getIndexOfThisSubtask
+    val keySets = new mutable.HashSet[String]()
+
     /**
       * 流中的每一个元素都会调用这个方法，调用结果将会放在Collector数据类型中输出。
       * Context可以访问元素的时间戳，元素的key，以及TimerService时间服务。
@@ -39,6 +44,8 @@ class TemperatureIncAlertKeyedProcessFunction extends KeyedProcessFunction[Strin
     override def processElement(value: SensorReading,
                                 ctx: KeyedProcessFunction[String, SensorReading, SensorReading]#Context,
                                 out: Collector[SensorReading]): Unit = {
+        keySets.add(value.id)
+        println(s"taskName:$taskName -> keySize: ${keySets.size}")
         //上次传感器温度
         val prevTemp = lastSensorRecord.value() match {
             case SensorReading(_, _, temp) => temp
@@ -55,7 +62,7 @@ class TemperatureIncAlertKeyedProcessFunction extends KeyedProcessFunction[Strin
             //            ctx.timerService().deleteProcessingTimeTimer(alertTime)
             ctx.timerService().deleteEventTimeTimer(alertTime)
             alertTimer.clear()
-        } else if (value.temperature - prevTemp > 5.0 && alertTime == 0) {
+        } else if (value.temperature - prevTemp > 0.1 && alertTime == 0) {
             //如果温度上升，并且还未注册报警定时器，则注册一个1s之后报警的报警定时器
             //            val alertProcessTime = ctx.timerService().currentProcessingTime() + 1000
             val alertProcessTime = ctx.timerService().currentWatermark() + 1000
@@ -87,5 +94,7 @@ class TemperatureIncAlertKeyedProcessFunction extends KeyedProcessFunction[Strin
         out.collect(SensorReading(s"WARNING:传感器id为:${ctx.getCurrentKey}的温度已连续上升1s了...", 0, 0))
         //报警之后清除报警时间戳，以备下次报警
         alertTimer.clear()
+        out.collect(SensorReading(s"${keySets.mkString(",")}", 0, 0))
+
     }
 }

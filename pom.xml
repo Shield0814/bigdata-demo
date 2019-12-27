@@ -26,6 +26,7 @@
         <module>user-behavior-analysis</module>
         <module>netty-demo</module>
         <module>gmall-parent</module>
+        <module>flink-gmall</module>
     </modules>
 
     <packaging>pom</packaging>

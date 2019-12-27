@@ -31,6 +31,7 @@ object SensorAppDemo {
 
         val sensorData: DataStream[SensorReading] = env.addSource(new SensorSource).setParallelism(1)
 
+
         //根据传感器温度把传感器切分为 NORMAL[<90],WARN[>=90,<100],DANGER[>=100]三个SplitStream
         val sensorDataWithState: SplitStream[SensorReading] = sensorData.split(r => {
             if (r.temperature >= 100) {

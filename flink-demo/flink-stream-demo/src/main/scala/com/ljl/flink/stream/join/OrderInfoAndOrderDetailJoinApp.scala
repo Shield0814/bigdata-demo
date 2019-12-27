@@ -29,6 +29,7 @@ object OrderInfoAndOrderDetailJoinApp {
                 override def extractTimestamp(element: OrderInfo): Long = element.ts * 1000L
             }).keyBy(_.id)
 
+
         orderInfoDataStream.print().setParallelism(1)
 
         val orderDetailDataStream = env.socketTextStream("bigdata116", 9999)

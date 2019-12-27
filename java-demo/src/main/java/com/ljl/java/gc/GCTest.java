@@ -18,10 +18,16 @@ public class GCTest {
         } finally {
             System.out.println(o2.get());
         }
+
+
     }
 
     public static void main(String[] args) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-
+        int i = 0;
+        i = i++;
+        System.out.println(i);
+        i = ++i;
+        System.out.println(i);
 
 //        Class<?> clazz2 = Class.forName("net.sf.cglib.proxy.Enhancer");
 //

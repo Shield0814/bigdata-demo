@@ -42,7 +42,7 @@ object TemperatureIncreaseAlertApp {
     def alertWhenTempInc(sensorsData: DataStream[SensorReading]) = {
 
         val tempIncAlert = sensorsData.keyBy(_.id)
-            .process(new TemperatureIncAlertKeyedProcessFunction)
+            .process(new TemperatureIncAlertKeyedProcessFunction).setParallelism(5)
         tempIncAlert.print()
 
         //        sensorsData.keyBy(_.id)

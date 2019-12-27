@@ -20,6 +20,7 @@ object WordCountAppScala {
 
         val value = sc.parallelize(Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
 
+
         val RES1 = value.aggregate(1)(_ + _, _ + _)
         println("RES1:" + RES1)
 

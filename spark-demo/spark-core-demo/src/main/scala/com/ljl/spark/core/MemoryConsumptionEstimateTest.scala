@@ -12,6 +12,11 @@ object MemoryConsumptionEstimateTest {
 
     def main(args: Array[String]): Unit = {
 
+
+    }
+
+
+    def test1(): Unit = {
         val random = Random
         val data1 = new util.HashMap[Int, Int]()
 
@@ -72,7 +77,5 @@ object MemoryConsumptionEstimateTest {
         println(data5.get(random.nextInt(10000000)))
         end = System.currentTimeMillis()
         println(end - start)
-
-
     }
 }
