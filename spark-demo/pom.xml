@@ -27,7 +27,7 @@
         <log4j.version>1.2.17</log4j.version>
         <slf4j.version>1.7.21</slf4j.version>
         <hadoop.version>2.7.2</hadoop.version>
-        <elasticsearch.version>5.6.2</elasticsearch.version>
+        <elasticsearch.version>7.11.2</elasticsearch.version>
     </properties>
     <!-- 声明并引入项目要用到的公有依赖信息-->
     <dependencies>
